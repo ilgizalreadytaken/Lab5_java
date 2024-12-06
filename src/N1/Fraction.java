@@ -1,14 +1,14 @@
 package N1;
 
-public class Fraction implements FractionInterface {
-    private int numerator; // Числитель
-    private int denominator; // Знаменатель
+public class Fraction<T extends Number> implements FractionInterface<T> {
+    private T numerator; // Числитель
+    private T denominator; // Знаменатель
     private Double cachedDecimalValue = null; // Кэш вещественного значения
 
     // Конструктор с числителем и знаменателем
-    public Fraction(int numerator, int denominator) {
-        if (denominator <= 0) {
-            throw new IllegalArgumentException("Знаменатель должен быть положительным!");
+    public Fraction(T numerator, T denominator) {
+        if (denominator.doubleValue() == 0) {
+            throw new IllegalArgumentException("Знаменатель не может быть нулевым!");
         }
         this.numerator = numerator;
         this.denominator = denominator;
@@ -18,23 +18,23 @@ public class Fraction implements FractionInterface {
     @Override
     public double getDecimalValue() {
         if (cachedDecimalValue == null) {
-            cachedDecimalValue = (double) numerator / denominator;
+            cachedDecimalValue = numerator.doubleValue() / denominator.doubleValue();
         }
         return cachedDecimalValue;
     }
 
     // Установка числителя
     @Override
-    public void setNumerator(int numerator) {
+    public void setNumerator(T numerator) {
         this.numerator = numerator;
         cachedDecimalValue = null; // Обнуляем кэш
     }
 
     // Установка знаменателя
     @Override
-    public void setDenominator(int denominator) {
-        if (denominator <= 0) {
-            throw new IllegalArgumentException("Знаменатель должен быть положительным!");
+    public void setDenominator(T denominator) {
+        if (denominator.doubleValue() == 0) {
+            throw new IllegalArgumentException("Знаменатель не может быть нулевым!");
         }
         this.denominator = denominator;
         cachedDecimalValue = null; // Обнуляем кэш
@@ -50,7 +50,8 @@ public class Fraction implements FractionInterface {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Fraction other)) return false;
-        return this.numerator * other.denominator == this.denominator * other.numerator;
+        if (!(obj instanceof Fraction<?> other)) return false;
+        return this.numerator.doubleValue() * other.denominator.doubleValue() ==
+                this.denominator.doubleValue() * other.numerator.doubleValue();
     }
 }

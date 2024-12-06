@@ -5,15 +5,15 @@ import java.util.List;
 
 public class ListMerger {
 
-    // Метод для слияния двух отсортированных списков
-    public static List<Integer> mergeSortedLists(List<Integer> L1, List<Integer> L2) {
-        List<Integer> mergedList = new ArrayList<>();
+    // Обобщённый метод для слияния двух отсортированных списков
+    public static <T extends Comparable<T>> List<T> mergeSortedLists(List<T> L1, List<T> L2) {
+        List<T> mergedList = new ArrayList<>();
         int i = 0, j = 0;
 
         // Слияние двух отсортированных списков
         while (i < L1.size() && j < L2.size()) {
             // Если элемент из списка L1 меньше или равен элементу из списка L2, добавляем его в mergedList
-            if (L1.get(i) <= L2.get(j)) {
+            if (L1.get(i).compareTo(L2.get(j)) <= 0) {
                 mergedList.add(L1.get(i)); // Добавляем текущий элемент из L1
                 i++; // Переходим к следующему элементу в L1
             } else {

@@ -1,64 +1,67 @@
 package N4;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Competition {
-    // Список участников соревнования
-    private List<Pupil> pupils;
+    private Map<Pupil, Integer> pupilScores; // Словарь для хранения участников и их суммарных баллов
 
-    // Конструктор, который инициализирует список участников
     public Competition() {
-        pupils = new ArrayList<>();  // Инициализация пустого списка участников
+        pupilScores = new HashMap<>(); // Инициализация словаря HashMap
     }
 
-    // Метод для добавления участника в соревнование
     public void addPupil(String surname, String name, int[] scores) {
-        // Создаем нового ученика и добавляем его в список
-        pupils.add(new Pupil(surname, name, scores));
+        Pupil pupil = new Pupil(surname, name, scores); // Создаем объект Pupil
+        int totalScore = pupil.getTotalScore(); // Считаем суммарный балл
+        pupilScores.put(pupil, totalScore); // Добавляем участника и его баллы в словарь
     }
 
-    // Метод для получения списка троих лучших участников (с учетом одинаковых баллов)
-    public List<Pupil> getTopThree() {
-        // Сортируем участников по убыванию их общей суммы баллов
-        pupils.sort((p1, p2) -> Integer.compare(p2.getTotalScore(), p1.getTotalScore()));
+    /*
+     * Метод для получения топ-3 участников и тех, кто набрал одинаковое количество баллов с ними.
+     * @return список участников.
+     */
+    public List<Pupil> getTopThreeWithTies() {
+        // Преобразуем словарь в список записей (ключ-значение) и сортируем их по убыванию баллов
+        List<Map.Entry<Pupil, Integer>> sortedEntries = pupilScores.entrySet()
+                .stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue())) // Сортировка по значению (баллам)
+                .collect(Collectors.toList()); // Преобразование в список
 
-        // Создаем список для топ-участников
-        List<Pupil> topPupils = new ArrayList<>();
-
-        // Проверяем, что список участников не пуст
-        if (pupils.size() > 0) {
-            // Добавляем первого участника (с наибольшим количеством баллов)
-            topPupils.add(pupils.get(0)); // 1-й участник
-
-            // Если есть второй участник, добавляем его
-            if (pupils.size() > 1) {
-                topPupils.add(pupils.get(1)); // 2-й участник
-            }
-
-            // Если есть третий участник, добавляем его
-            if (pupils.size() > 2) {
-                topPupils.add(pupils.get(2)); // 3-й участник
-            }
-
-            // Получаем сумму баллов для каждого из трех лучших участников
-            int top1Score = pupils.get(0).getTotalScore(); // Баллы первого участника
-            int top2Score = pupils.size() > 1 ? pupils.get(1).getTotalScore() : Integer.MIN_VALUE; // Баллы второго участника (если есть)
-            int top3Score = pupils.size() > 2 ? pupils.get(2).getTotalScore() : Integer.MIN_VALUE; // Баллы третьего участника (если есть)
-
-            // Проходим по всем участникам и добавляем тех, у кого баллы совпадают с лучшими тремя
-            for (Pupil pupil : pupils) {
-                int pupilScore = pupil.getTotalScore(); // Баллы текущего участника
-                // Если баллы ученика совпадают с баллами любого из трех лучших
-                if (pupilScore == top1Score || pupilScore == top2Score || pupilScore == top3Score) {
-                    // Добавляем ученика в список топ-участников, если его там нет (чтобы избежать дублирования)
-                    if (!topPupils.contains(pupil)) {
-                        topPupils.add(pupil);
-                    }
-                }
-            }
+        // Если участников меньше 3, возвращаем их всех
+        if (sortedEntries.size() <= 3) {
+            return sortedEntries.stream()
+                    .map(Map.Entry::getKey) // Извлекаем ключи (участники)
+                    .collect(Collectors.toList());
         }
 
-        // Возвращаем список топ-участников
-        return topPupils;
+        // Определяем уникальные значения баллов для топ-3 участников
+        Set<Integer> topScores = new HashSet<>();
+        for (int i = 0; i < sortedEntries.size() && topScores.size() < 3; i++) {
+            topScores.add(sortedEntries.get(i).getValue()); // Добавляем баллы в множество
+        }
+
+        // Возвращаем всех участников, чьи баллы совпадают с баллами из топ-3
+        return sortedEntries.stream()
+                .filter(entry -> topScores.contains(entry.getValue())) // Фильтруем по топовым баллам
+                .map(Map.Entry::getKey) // Извлекаем участников (ключи словаря)
+                .collect(Collectors.toList()); // Преобразуем в список
     }
 }
+
+
+/**
+ * Алгоритм метода getTopThreeWithTies:
+ * 1. Получить записи (entry) из словаря (Map), содержащие участников и их баллы.
+ * 2. Отсортировать записи по убыванию баллов.
+ *    - Используем Stream API для сортировки.
+ * 3. Проверить количество участников:
+ *    - Если участников 3 или меньше, вернуть всех участников.
+ * 4. Найти уникальные баллы для топ-3 мест:
+ *    - Создать множество (Set) для хранения уникальных баллов.
+ *    - Проходить по отсортированным записям, добавляя баллы в множество, пока оно не будет содержать 3 элемента.
+ * 5. Отобрать участников, чьи баллы входят в топ-3:
+ *    - Используем фильтрацию с помощью Stream API.
+ *    - Проверяем, входят ли баллы участника в множество топ-3 баллов.
+ * 6. Вернуть список участников, удовлетворяющих условиям.
+ */
+

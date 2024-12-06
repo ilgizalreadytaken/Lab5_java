@@ -1,9 +1,9 @@
 package N1;
 
-public interface FractionInterface {
+public interface FractionInterface<T extends Number> {
     double getDecimalValue(); // Получение вещественного значения
-    void setNumerator(int numerator); // Установка числителя
-    void setDenominator(int denominator); // Установка знаменателя
+    void setNumerator(T numerator); // Установка числителя
+    void setDenominator(T denominator); // Установка знаменателя
 }
 
 /*
